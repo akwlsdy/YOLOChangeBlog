@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> <!-- 引入 CSS 样式 -->
+</head>
+<body>
+    <h1>Image Gallery 图片库</h1>
+
+    <!-- 搜索栏 -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <input type="text" id="searchInput" placeholder="Search images..." 
+               style="padding: 10px; width: 40%; border: 1px solid #ccc; border-radius: 5px;">
+        <button onclick="fetchImages()" 
+                style="padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
+            Search 搜索
+        </button>
+    </div>
+
+    <!-- 图片展示区域 -->
+    <div id="imageGallery" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+        <!-- 图片将通过 JavaScript 动态插入 -->
+    </div>
+
+    <!-- 引入 JavaScript -->
+    <script>
+        async function fetchImages() {
+            const searchQuery = document.getElementById("searchInput").value.trim(); // 获取搜索输入
+            const response = await fetch(`/api/images/?search=${searchQuery}`); // 向 API 请求数据
+            const data = await response.json(); // 解析返回数据
+            const gallery = document.getElementById("imageGallery");
+            gallery.innerHTML = ""; // 清空现有图片
+
+            if (!data || data.length === 0) {
+                gallery.innerHTML = "<p style='text-align:center;'>No images found 未找到图片</p>";
+                return;
+            }
+
+            // 动态生成图片元素
+            data.forEach(image => {
+                const imgContainer = document.createElement("div");
+                imgContainer.style = "text-align: center;";
+
+                const imgElement = document.createElement("img");
+                imgElement.src = image.image_file;
+                imgElement.alt = image.title;
+                imgElement.style = "width: 200px; height: 200px; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);";
+
+                const titleElement = document.createElement("p");
+                titleElement.textContent = image.title;
+
+                imgContainer.appendChild(imgElement);
+                imgContainer.appendChild(titleElement);
+                gallery.appendChild(imgContainer);
+            });
+        }
+
+        // 页面加载时显示所有图片
+        window.onload = fetchImages;
+    </script>
+</body>
+</html>
